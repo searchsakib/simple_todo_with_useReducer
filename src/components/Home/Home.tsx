@@ -14,6 +14,7 @@ type TAction = {
 const initialState = {
   name: '',
   details: '',
+  notes: [],
 };
 function reducer(formData: TFormData, action: TAction) {
   switch (action.type) {
@@ -30,7 +31,11 @@ function reducer(formData: TFormData, action: TAction) {
       };
     }
     case 'reset': {
-      return initialState;
+      return {
+        ...formData,
+        name: '',
+        details: '',
+      };
     }
     default:
       return formData;
@@ -38,8 +43,7 @@ function reducer(formData: TFormData, action: TAction) {
 }
 const Home = () => {
   const [formData, dispatch] = useReducer(reducer, initialState);
-  const [isSubmitted, setIsSubmitted] = useState(false);
-  const [submittedData, setSubmittedData] = useState<TFormData | null>(null);
+  const [notes, setNotes] = useState<{ name: string; details: string }[]>([]);
   const handleNameChange = (e: ChangeEvent<HTMLInputElement>) => {
     dispatch({ type: 'name_field', payload: e.target.value });
   };
@@ -49,8 +53,10 @@ const Home = () => {
   };
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setIsSubmitted(true);
-    setSubmittedData(formData);
+    setNotes([
+      ...notes,
+      { name: formData.name || '', details: formData.details || '' },
+    ]);
     console.log(formData.name, formData.details);
     dispatch({ type: 'reset' });
   };
@@ -91,7 +97,13 @@ const Home = () => {
           </button>
         </form>
       </div>
-      {isSubmitted && submittedData && <Notes formData={submittedData}></Notes>}
+      <div className='flex flex-wrap gap-7'>
+        {notes?.map((note) => (
+          <div key={note.name} className='w-full'>
+            <Notes note={note}></Notes>
+          </div>
+        ))}
+      </div>
     </div>
   );
 };
